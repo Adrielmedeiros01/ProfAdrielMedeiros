@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link style="border-radius: 100%;" rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREAH6eVwmFf9yp-c_0dg4H9Rxe2GsxXGk-cQ&s">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <title>Site Prof. Adriel M.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        nav {
+            display: flex;
+            width: 100%;
+            position: fixed;
+            background-color: black;
+        }
+        .lad1 {
+            padding: 0.5rem;
+            width: 5%;
+            color: #3a8fb7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lad2 {
+            width: 30%;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #3a8fb7;
+        }
+        .lad3 {
+            border: 1px solid;
+            width: 60%;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: end;
+            align-items: center;            
+        }
+        nav img {
+            border-radius: 100%;
+        }
+        nav a {
+            list-style-type: none;
+            text-decoration: none;
+            color: white;
+        }
+        nav ul li {
+            display: inline;
+            margin-left: 1rem;
+        }
+        .imagem_principal {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .imagem_principal img {
+            box-shadow: 3px 5px 8px grey;
+            border: 1px solid;
+            border-radius: 5px;
+        }
+        .boas_vindas {
+            padding: 1rem;
+            text-align: center;
+            font-size: 15px;
+        }
+        header {
+            width: 85%;
+            margin: 7.5%;
+            margin-top: 0;
+        }
+        main {
+            width: 85%;
+            margin: 7.5%;
+            margin-top: 0;
+        }
+        main a {
+            color: blue;
+        }
+        .feed {
+            width: 100%;
+            display: flex;
+        }
+        .atividades {
+            margin-left: 3rem;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 12rem;
+            font-size: 12px;
+            background: white;  
+        }
+        #busca {
+            display: none;
+            text-align: center;
+        }
+        #busca a{
+            margin-left: 0;
+        }
+        .btn1 {
+            padding: 4px;
+            background-color: white;
+            border: 1px solid;
+            box-shadow: 5px 4px 8px rgb(192, 192, 192);
+            border-radius: 8px;
+            width: 150px; 
+            transition: 0.8s;
+        }
+        .btn1:hover {
+            padding: 0.8rem;
+            transition: 0.8s;
+        }
+        #btn1 {
+            margin-left: 0;
+        }     
+        .btm-menu {        
+            display: none;
+            width: 10%;
+            margin-left: 12rem;        
+            
+        }        
+        .btm-menu.ativo {          
+            display: block;
+        }      
+        #icon-menu {     
+            display: flex;
+            padding: 1rem;
+            align-items: center;
+            justify-content: center;
+            color: white;                        
+        }
+        @media screen and (max-width: 730px) {            
+            .lad1 {               
+                display: none;          
+            }      
+            .lad3 {
+                display: none;
+                flex-direction: column;
+                background: black;
+                position: absolute;
+                top: 60px;      /* altura do nav */
+                left: 0;
+                width: 100%;
+                padding: 1rem 0;
+                z-index: 999;              
+            }          
+            .lad3 ul li {
+                display: block;
+                text-align: center;
+                padding: 1rem;
+                margin: 0;               
+            }
+            .boas_vindas {
+                padding: 1rem;
+                text-align: center;
+                font-size: 12px;
+            }                      
+            #myNome {
+                display: none;
+                margin-left: 10px                           
+            }                        
+            .btm-menu {         
+                display: block;      
+            }
+            .feed {
+                flex-direction: column;
+                width: 100%;
+                margin-left: 0;
+            }
+            .post1 {
+                margin: 0;
+                width: 100%;
+            }
+            .post2 {
+                margin: 0;
+            }
+            #busca {
+                display: block;            
+            }
+        }
+    </style>
+</head>
+<body onresize="mudoutamanho">
+    <nav>
+        <div class="lad1">
+            <a href="index.html">  <img width="60%"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREAH6eVwmFf9yp-c_0dg4H9Rxe2GsxXGk-cQ&s"
+                alt="img"></a>
+        </div>
+        <div class="lad2">
+           <a id="myNome" href="index.html"><p>Prof. Adriel M. Araújo</p></a>
+        </div>
+        <div id="mostrar" class="lad3">
+            <ul>
+                <li><a href="#boasV">Home</a></li>
+                <li><a href="professores.html">Professores</a></li>
+                <li><a href="atividades.html">Alunos</a></li>
+                <li><a href="sobre.html">Sobre</a></li>
+            </ul>
+        </div>
+        <div class="btm-menu">      
+            <i id="icon-menu" class="material-symbols-outlined" onclick="clickMenu()">menu</i>
+            <!--
+                <button onclick="clickMenu()" type="button" class="icon-menu" ><b>Menu</b></button>           
+            -->
+        </div>
+        <script>
+            function clickMenu(){ 
+                const mostra = document.getElementById("mostrar");      
+                if(mostra.style.display === "none"){
+                    mostra.style.display = "block";                                         
+                }
+                else {
+                    mostra.style.display = "none";             
+                }                                  
+                function mudoutamanho() {
+                    if (window.innerWidth >= 768) {
+                        mostra.style.display = "flex";                      
+                    }
+                    else {                        
+                        mostra.style.display = "none";
+                    }
+                }
+                window.onload = mudoutamanho;
+                window.onresize = mudoutamanho;                                  
+            }   
+        </script>
+    </nav>
+    <header>
+        <section id="boasV" class="boas_vindas">
+            <br><br><br><br><br>
+            <h1>Bem Vindo ao site do professor Adriel M. Araújo</h1>
+            <br><br>
+            <p><b>Hello World! </b>Este site tem por objetivo auxiliar alunos e professores</p>
+        </section>
+        <section class="imagem_principal">
+            <img width="90%"
+                src="https://www.centrodeestudoseformacao.com.br/uploads/blog_posts/467/00i_computer-01.webp" alt="">
+        </section>
+    </header>
+    <br><br><br><br><br><br>
+    <footer>
+        <a href="https://www.youtube.com/@AthelstanINFO"><img  width="5%" src="logoYT.png" alt=""></a>
+        <a href="https://github.com/Adrielmedeiros01"><img width="5%"  src="logoGit.png" alt=""></a>
+        <br><br>
+        <p>@COPY2025-2026 A.M</p>
+    </footer>
+</body>
+</html>

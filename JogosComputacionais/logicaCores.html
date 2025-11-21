@@ -1,0 +1,213 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo da Lógica das Cores</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #555;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .rule {
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+    .circle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+    }
+    .circle.selected {
+      outline: 3px solid #3b82f6;
+    }
+    .color {
+      border-radius: 50%;
+      margin-bottom: 5px;
+    }
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .submit { background: #2563eb; color: white; }
+    .next { background: #e5e7eb; }
+    .hint { font-size: 0.85em; color: #555; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jogo da Lógica das Cores</h1>
+    <div class="rule" id="ruleDisplay"></div>
+    <div class="grid" id="grid"></div>
+    <div class="controls">
+      <button class="submit" id="btnSubmit">Enviar</button>
+      <button class="next" id="btnNext">Próxima regra</button>
+    </div>
+    <div class="hint">Selecione todos os círculos que atendem à regra acima.</div>
+    <p id="scoreDisplay">Pontos: 0</p>
+  </div>  <script>
+    const COLORS = ['vermelho','azul','verde','amarelo','roxo'];
+    const SIZES = ['pequeno','médio','grande'];
+    let pool = [];
+    let rule = null;
+    let score = 0;
+
+    function random(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function generatePool(n=12){
+      pool = [];
+      for(let i=0;i<n;i++){
+        pool.push({
+          id:i+1,
+          cor:random(COLORS),
+          tamanho:random(SIZES)
+        });
+      }
+    }
+
+    function buildRule(){
+      const kind = Math.random();
+      if(kind<0.33){
+        rule={tipo:'and',esq:{attr:'cor',valor:random(COLORS)},dir:{attr:'tamanho',valor:random(SIZES)}};
+      }else if(kind<0.66){
+        rule={tipo:'or',esq:{attr:'cor',valor:random(COLORS)},dir:{attr:'tamanho',valor:random(SIZES)}};
+      }else{
+        rule={tipo:'neg',esq:{attr:'cor',valor:random(COLORS)}};
+      }
+    }
+
+    function drawRule(){
+      const el=document.getElementById('ruleDisplay');
+      if(rule.tipo==='neg') el.innerHTML=`A cor <b>não</b> é <b>${rule.esq.valor}</b>`;
+      if(rule.tipo==='and') el.innerHTML=`A cor é <b>${rule.esq.valor}</b> <b>e</b> o tamanho é <b>${rule.dir.valor}</b>`;
+      if(rule.tipo==='or') el.innerHTML=`A cor é <b>${rule.esq.valor}</b> <b>ou</b> o tamanho é <b>${rule.dir.valor}</b>`;
+    }
+
+    function colorClass(cor){
+      return {
+        vermelho:'#ef4444',
+        azul:'#3b82f6',
+        verde:'#22c55e',
+        amarelo:'#facc15',
+        roxo:'#a855f7'
+      }[cor];
+    }
+
+    function drawPool(){
+      const grid=document.getElementById('grid');
+      grid.innerHTML='';
+      pool.forEach(c=>{
+        const div=document.createElement('div');
+        div.className='circle';
+        div.dataset.id=c.id;
+        const colorDiv=document.createElement('div');
+        colorDiv.className='color';
+        colorDiv.style.background=colorClass(c.cor);
+        const sizePx=c.tamanho==='pequeno'?30:c.tamanho==='médio'?45:60;
+        colorDiv.style.width=sizePx+'px';
+        colorDiv.style.height=sizePx+'px';
+        const text=document.createElement('div');
+        text.innerText=`${c.cor} · ${c.tamanho}`;
+        div.appendChild(colorDiv);
+        div.appendChild(text);
+        div.onclick=()=>{
+          div.classList.toggle('selected');
+        };
+        grid.appendChild(div);
+      });
+    }
+
+    function matches(c,cond){
+      if(cond.attr==='cor') return c.cor===cond.valor;
+      if(cond.attr==='tamanho') return c.tamanho===cond.valor;
+    }
+
+    function evaluate(c,rule){
+      if(rule.tipo==='neg') return !matches(c,rule.esq);
+      if(rule.tipo==='and') return matches(c,rule.esq)&&matches(c,rule.dir);
+      if(rule.tipo==='or') return matches(c,rule.esq)||matches(c,rule.dir);
+      return false;
+    }
+
+    function submit(){
+      const selected=[...document.querySelectorAll('.circle.selected')].map(e=>parseInt(e.dataset.id));
+      const correct=pool.filter(c=>evaluate(c,rule)).map(c=>c.id);
+      let pts=0;
+      correct.forEach(id=>{if(selected.includes(id)) pts++;});
+      selected.forEach(id=>{if(!correct.includes(id)) pts--;});
+      score+=pts;
+      document.getElementById('scoreDisplay').innerText=`Pontos: ${score}`;
+      // show results
+      document.querySelectorAll('.circle').forEach(div=>{
+        const id=parseInt(div.dataset.id);
+        if(correct.includes(id)){
+          const mark=document.createElement('span');
+          mark.innerText='✓';
+          mark.style.color='green';
+          mark.style.position='absolute';
+          mark.style.top='5px';
+          mark.style.right='8px';
+          div.appendChild(mark);
+        }else{
+          const mark=document.createElement('span');
+          mark.innerText='✕';
+          mark.style.color='red';
+          mark.style.position='absolute';
+          mark.style.top='5px';
+          mark.style.right='8px';
+          div.appendChild(mark);
+        }
+        div.onclick=null;
+      });
+    }
+
+    function next(){
+      generatePool();
+      buildRule();
+      drawRule();
+      drawPool();
+    }
+
+    document.getElementById('btnSubmit').onclick=submit;
+    document.getElementById('btnNext').onclick=next;
+
+    generatePool();
+    buildRule();
+    drawRule();
+    drawPool();
+  </script></body>
+</html>

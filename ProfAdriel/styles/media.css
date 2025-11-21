@@ -1,0 +1,51 @@
+
+@media screen and (max-width: 768px) {
+    header img {
+        display: none;
+    }
+
+    /* impede o p de empurrar o menu */
+    header p {
+        display: none !important;
+    }
+
+    .btm-menu {         
+        display: block;      
+    }
+
+    header nav{
+        display: none;
+        flex-direction: column;
+        background: black;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        padding: 1rem 0;
+        z-index: 999;  
+        opacity: 95%;
+    }
+
+    /* CENTRALIZA corretamente */
+    header nav ul {
+        padding: 0;
+        margin: 0 auto;
+        width: 100%;
+        text-align: center;
+    }
+
+    nav ul li {   
+        display: block;
+        text-align: center;
+        padding: 0.5rem;
+        margin: 1rem auto;
+        list-style-type: none;          
+    }
+}
+
+
+@media screen and (max-width: 468px) {
+    .boasvindas h1{
+        font-size: 25px;
+    }
+}

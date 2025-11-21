@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Caça à Verdade</title>
+  <style>
+    :root {
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #ef4444;
+      --muted: #6b7280
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background-color: #0f172a;  
+      margin: 0;
+      padding: 3rem;
+    }
+
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(10, 20, 40, 0.06)
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      color: var(--blue)
+    }
+
+    p.lead {
+      margin: 0 0 14px;
+      color: var(--muted)
+    }
+
+    ol.sentences {
+      padding-left: 18px
+    }
+
+    li.sentence {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    label.text {
+      flex: 1
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px
+    }
+
+    button {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600
+    }
+
+    .btn-check {
+      background: var(--blue);
+      color: white
+    }
+
+    .btn-new {
+      background: #e5e7eb
+    }
+
+    .result {
+      margin-top: 14px;
+      font-weight: 700
+    }
+
+    .correct {
+      color: var(--green)
+    }
+
+    .wrong {
+      color: var(--red)
+    }
+
+    .explain {
+      margin-top: 12px;
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 8px;
+      color: #0f172a
+    }
+
+    footer {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .mark {
+      margin-left: 10px;
+      font-weight: 700
+    }
+
+    .hidden {
+      display: none
+    }
+
+    .print {
+      margin-left: auto
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <br>
+    <header style="display:flex;align-items:center;gap:12px">
+      <h1>Caça à Verdade</h1>
+      <div class="lead">Escolha as sentenças que são <strong>verdadeiras</strong>. Depois clique em <em>Verificar</em>.
+      </div>
+      <!--<button class="print" onclick="window.print()">Imprimir</button>-->
+    </header>
+    <br>
+    <hr>
+    <main>
+      <form id="gameForm">
+        <ol class="sentences" id="list"></ol>
+      </form>
+      <hr>
+      <div class="controls">
+        <button id="btnCheck" class="btn-check">Verificar</button>
+        <button id="btnNew" class="btn-new" title="Gerar novo conjunto">Nova lista</button>
+        <div style="margin-left:auto;color:var(--muted)" id="score">Pontos: 0</div>
+      </div>
+      <div id="feedback" class="result hidden"></div>
+      <div id="explanations" class="explain hidden"></div>
+    </main>
+    
+    <footer>
+      <br>
+      <p style="text-align: center;">COPY@2025 A.M</p>
+    </footer>
+
+  </div>
+  <script>
+  const SENTENCES_BANK = [
+    { t: 'O dia tem 24 horas e o ano tem 12 meses.', v: true, e: 'Ambos os fatos são verdadeiros.' },
+    { t: '7 × 7 = 48 ou 5 × 5 = 25.', v: true, e: 'A disjunção é verdadeira porque 5×5=25 é verdadeira.' },
+    { t: 'A palavra "lua" não tem vogais.', v: false, e: '"lua" tem as vogais u e a.' },
+    { t: 'O Brasil fica na Europa.', v: false, e: 'O Brasil fica na América do Sul.' },
+    { t: '5 não é maior que 6.', v: true, e: 'A negação de "5 é maior que 6" é verdadeira.' },
+    { t: 'A água é sólida à temperatura ambiente.', v: false, e: 'A água é líquida à temperatura ambiente.' },
+    { t: '8 é par e 3 é ímpar.', v: true, e: '8 é par (sim) e 3 é ímpar (sim).' },
+    { t: 'O sol é uma estrela ou a lua é maior que o sol.', v: true, e: 'A primeira parte (sol é uma estrela) é verdadeira.' },
+    { t: '2 + 2 = 5 e 1 + 1 = 2.', v: false, e: 'Conjunção falsa porque 2+2=4 não é 5.' },
+    { t: 'Paris é a capital da França e é maior que o Brasil.', v: false, e: 'Paris é capital da França, mas não é maior que o Brasil.' },
+    { t: 'A soma de 2 e 3 é igual a 5 ou igual a 6.', v: true, e: '2+3=5, então a disjunção é verdadeira.' },
+    { t: 'Existem 60 minutos em uma hora.', v: true, e: 'Isso é verdadeiro.' },
+    { t: 'Um triângulo tem quatro lados.', v: false, e: 'Triângulo tem três lados.' },
+    { t: 'A Terra é plana.', v: false, e: 'A Terra é aproximadamente esférica.' },
+    { t: 'A palavra "sol" possui uma vogal.', v: true, e: 'A letra o é vogal.' },
+    { t: 'Um ano bissexto tem 366 dias.', v: true, e: 'O ano bissexto tem um dia a mais em fevereiro.' },
+    { t: 'O número zero é par.', v: true, e: 'Zero é considerado um número par.' },
+    { t: 'Todos os pássaros sabem voar.', v: false, e: 'Pinguins e avestruzes não voam.' },
+    { t: 'O gelo derrete quando aquecido.', v: true, e: 'O calor muda o estado do gelo.' },
+    { t: '3 + 4 = 8 ou 2 × 3 = 6.', v: true, e: 'A disjunção é verdadeira porque 2×3=6 é verdadeiro.' },
+    { t: 'Um quadrado tem quatro lados iguais e quatro ângulos retos.', v: true, e: 'Essas são as propriedades de um quadrado.' },
+    { t: 'Os peixes respiram fora da água.', v: false, e: 'Peixes respiram com brânquias, dentro da água.' },
+    { t: 'O fogo é frio e a neve é quente.', v: false, e: 'O fogo é quente e a neve é fria.' },
+    { t: '2 é par e 5 é ímpar.', v: true, e: 'Ambas as sentenças são verdadeiras.' },
+    { t: 'As plantas produzem oxigênio durante o dia.', v: true, e: 'Na fotossíntese, as plantas liberam oxigênio.' },
+    { t: 'O ser humano pode viver sem água por meses.', v: false, e: 'O corpo humano precisa de água diariamente.' },
+    { t: 'Os meses de abril, junho, setembro e novembro têm 30 dias.', v: true, e: 'Essa é a regra do calendário.' },
+    { t: 'A lua é feita de queijo.', v: false, e: 'Isso é apenas uma lenda.' },
+    { t: '10 é múltiplo de 2 e de 5.', v: true, e: '10 é divisível por 2 e por 5.' },
+    { t: 'Os mamíferos botam ovos.', v: false, e: 'A maioria não bota ovos; exceção é o ornitorrinco.' },
+    { t: 'O vento é visível a olho nu.', v: false, e: 'Vemos apenas seus efeitos.' },
+    { t: 'O planeta Marte é conhecido como planeta vermelho.', v: true, e: 'Por causa do óxido de ferro em sua superfície.' },
+    { t: 'A letra "b" é uma vogal.', v: false, e: 'É uma consoante.' },
+    { t: 'Os cães são répteis.', v: false, e: 'Os cães são mamíferos.' },
+    { t: 'O coração humano tem quatro cavidades.', v: true, e: 'Duas aurículas e dois ventrículos.' },
+    { t: 'Um milênio tem 100 anos.', v: false, e: 'Um milênio tem 1000 anos.' },
+    { t: 'Os olhos humanos distinguem milhões de cores.', v: true, e: 'O sistema visual é muito sensível a cores.' },
+    { t: 'A Antártida é o continente mais quente.', v: false, e: 'É o mais frio.' },
+    { t: 'O sangue é azul dentro do corpo e vermelho fora.', v: false, e: 'O sangue é sempre vermelho; a cor muda com o oxigênio.' },
+    { t: 'A eletricidade é uma forma de energia.', v: true, e: 'É energia do movimento de elétrons.' },
+    { t: 'As borboletas começam a vida como lagartas.', v: true, e: 'Elas passam por metamorfose.' },
+    { t: 'O deserto do Saara é coberto de gelo.', v: false, e: 'É um deserto de areia no norte da África.' },
+    { t: 'Os planetas giram ao redor do Sol.', v: true, e: 'Esse é o modelo do sistema solar.' },
+    { t: '5 × 2 = 9 ou 3 + 4 = 7.', v: true, e: 'A disjunção é verdadeira porque 3+4=7.' },
+    { t: 'Nenhum número é maior que ele mesmo.', v: false, e: 'Todo número é igual a ele mesmo, não menor.' },
+    { t: 'A palavra "escola" começa com vogal.', v: true, e: 'A primeira letra é E, uma vogal.' },
+    { t: 'O Oceano Pacífico é o maior do planeta.', v: true, e: 'É o maior e mais profundo oceano.' },
+    { t: 'O Sol gira em torno da Terra.', v: false, e: 'A Terra gira ao redor do Sol.' },
+    { t: 'A Amazônia é a maior floresta tropical do mundo.', v: true, e: 'Está localizada em grande parte no Brasil.' },
+    { t: 'O som viaja mais rápido no ar do que na água.', v: false, e: 'O som viaja mais rápido na água.' },
+    { t: 'O plural de "pão" é "pãos".', v: false, e: 'O plural correto é "pães".' },
+    { t: 'Numa conjunção, se uma parte é falsa, o todo é falso.', v: true, e: 'Essa é a regra da lógica para o “e”.' },
+    { t: 'Numa disjunção, basta uma parte ser verdadeira para o todo ser verdadeiro.', v: true, e: 'Essa é a regra da lógica para o “ou”.' },
+    { t: 'A palavra "verde" tem duas vogais.', v: true, e: 'As vogais são e e e.' },
+    { t: '9 é menor que 8 e 7 é maior que 6.', v: false, e: 'A primeira parte é falsa, então o todo é falso.' },
+    { t: 'O oposto de “sempre” é “nunca”.', v: true, e: 'São palavras de sentido contrário.' },
+    { t: 'Se chove, então o chão fica molhado.', v: true, e: 'É uma implicação lógica verdadeira.' },
+    { t: 'Todas as vogais estão na palavra “casa”.', v: false, e: 'Só tem a e a; faltam e, i, o, u.' },
+    { t: 'Os números primos são divisíveis apenas por 1 e por eles mesmos.', v: true, e: 'Essa é a definição de número primo.' }
+  ];
+
+
+    const listEl = document.getElementById('list');
+    const btnCheck = document.getElementById('btnCheck');
+    const btnNew = document.getElementById('btnNew');
+    const feedback = document.getElementById('feedback');
+    const explanations = document.getElementById('explanations');
+    const scoreDisplay = document.getElementById('score');
+
+    let currentSet = [];
+    let score = 0;
+
+    function sample(arr, n) {
+      const copy = arr.slice();
+      const res = [];
+      while (res.length < n && copy.length) {
+        const i = Math.floor(Math.random() * copy.length);
+        res.push(copy.splice(i, 1)[0]);
+      }
+      return res;
+    }
+
+    function renderList() {
+      listEl.innerHTML = '';
+      currentSet.forEach((s, idx) => {
+        const li = document.createElement('li');
+        li.className = 'sentence';
+        li.innerHTML = `
+          <input type="checkbox" id="s_${idx}" data-index="${idx}" />
+          <label for="s_${idx}" class="text">${s.t}</label>
+          <span class="mark hidden" id="mark_${idx}"></span>
+        `;
+        listEl.appendChild(li);
+      });
+      feedback.classList.add('hidden');
+      explanations.classList.add('hidden');
+    }
+
+    function newList() {
+      currentSet = sample(SENTENCES_BANK, 8);
+      renderList();
+    }
+
+    function checkAnswers(e) {
+      e.preventDefault();
+      const checks = Array.from(document.querySelectorAll('#list input[type=checkbox]'));
+      let correctCount = 0;
+      const explains = [];
+      checks.forEach(ch => {
+        const idx = parseInt(ch.dataset.index, 10);
+        const s = currentSet[idx];
+        const user = ch.checked;
+        const correct = s.v;
+        const markEl = document.getElementById('mark_' + idx);
+        markEl.classList.remove('hidden');
+        if (user === correct) {
+          markEl.textContent = '✓';
+          markEl.style.color = 'var(--green)';
+          correctCount++;
+        } else {
+          markEl.textContent = '✕';
+          markEl.style.color = 'var(--red)';
+        }
+        explains.push(`<strong>${s.t}</strong><br>Resposta: <span style="color:${s.v ? 'var(--green)' : 'var(--red)'}">${s.v ? 'Verdadeiro' : 'Falso'}</span><br>Explicação: ${s.e}`);
+      });
+
+      feedback.classList.remove('hidden');
+      feedback.innerHTML = `Você acertou <strong>${correctCount}</strong> de ${checks.length}.`;
+      explanations.classList.remove('hidden');
+      explanations.innerHTML = explains.join('<hr style="margin:10px 0">');
+
+      // Pontuação simples: +1 por acerto
+      score += correctCount;
+      scoreDisplay.textContent = 'Pontos: ' + score;
+    }
+
+    btnNew.addEventListener('click', (ev) => { ev.preventDefault(); newList(); });
+    btnCheck.addEventListener('click', checkAnswers);
+
+    // inicializa
+    newList();
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo: Caminho Lógico</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2563eb;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #path {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cell.active { background: #93c5fd; color: white; }
+    .cell.correct { background: #22c55e; color: white; }
+    .cell.wrong { background: #ef4444; color: white; }
+    .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .start { background: #2563eb; color: white; }
+    .next { background: #e5e7eb; }
+    #rule {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.1em;
+      margin-top: 10px;
+    }
+    #score { text-align: center; margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jogo: Caminho Lógico</h1>
+    <div id="rule">Clique em “Nova Regra” para começar!</div>
+    <div id="path"></div>
+    <div class="controls">
+      <button class="start" id="btnStart">Nova Regra</button>
+      <button class="next" id="btnNext">Mostrar Resposta</button>
+    </div>
+    <div id="score">Pontos: 0</div>
+     <footer>
+      <br>
+      <p style="text-align: center;">COPY@2025 A.M</p>
+    </footer>
+  </div>  <script>
+    const pathEl = document.getElementById('path');
+    const ruleEl = document.getElementById('rule');
+    const scoreEl = document.getElementById('score');
+
+    let grid = [];
+    let rule = null;
+    let score = 0;
+
+    function createGrid(size = 25){
+      grid = [];
+      pathEl.innerHTML = '';
+      for(let i=0;i<size;i++){
+        const num = Math.floor(Math.random()*20)+1;
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = num;
+        cell.dataset.value = num;
+        cell.addEventListener('click',()=> selectCell(cell));
+        pathEl.appendChild(cell);
+        grid.push(cell);
+      }
+    }
+
+    function buildRule(){
+      const type = Math.random();
+      const n1 = Math.floor(Math.random()*10)+5;
+      const n2 = Math.floor(Math.random()*10)+2;
+      if(type < 0.33){
+        rule = { tipo:'and', texto:`Escolha números maiores que ${n1} e menores que ${n1 + 5}`, test: v => v>n1 && v<(n1+5)};
+      }else if(type < 0.66){
+        rule = { tipo:'or', texto:`Escolha números pares ou maiores que ${n2+10}`, test: v => v%2===0 || v>(n2+10)};
+      }else{
+        rule = { tipo:'neg', texto:`Escolha números que não sejam menores que ${n2}`, test: v => !(v<n2)};
+      }
+      ruleEl.textContent = rule.texto;
+    }
+
+    function selectCell(cell){
+      cell.classList.toggle('active');
+    }
+
+    function showAnswers(){
+      let points = 0;
+      grid.forEach(c=>{
+        const val = parseInt(c.dataset.value);
+        const correct = rule.test(val);
+        if(correct && c.classList.contains('active')){
+          c.classList.add('correct'); points++; }
+        else if(!correct && c.classList.contains('active')){
+          c.classList.add('wrong'); points--; }
+        else if(correct && !c.classList.contains('active')){
+          c.classList.add('correct'); }
+      });
+      score += points;
+      scoreEl.textContent = `Pontos: ${score}`;
+    }
+
+    document.getElementById('btnStart').addEventListener('click',()=>{
+      createGrid();
+      buildRule();
+    });
+
+    document.getElementById('btnNext').addEventListener('click',showAnswers);
+
+    createGrid();
+  </script></body>
+</html>

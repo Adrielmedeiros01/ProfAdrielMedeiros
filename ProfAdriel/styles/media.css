@@ -49,3 +49,12 @@
         font-size: 25px;
     }
 }
+
+
+/*Media professores*/
+@media screen and (max-width: 768px) {
+    
+    .iframes {
+        width: 80%;
+    }
+}
